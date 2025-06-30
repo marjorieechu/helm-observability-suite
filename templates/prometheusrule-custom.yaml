@@ -1,0 +1,6 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cluster-health-rules
+  namespace: monitoring
+spec: { { - toYaml $ruleData | nindent 2 } }

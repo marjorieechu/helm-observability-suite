@@ -1,0 +1,53 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cluster-health-rules
+  namespace: monitoring
+spec:
+  groups:
+    - name: cluster-health
+      rules:
+        - alert: HighCPUUsage
+          expr: avg(rate(container_cpu_usage_seconds_total[5m])) by (pod) > 0.85
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU usage on pod {{ $labels.pod }}"
+            description: "CPU usage has been over 85% for more than 2 minutes."
+
+        - alert: NodeDiskAlmostFull
+          expr: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes > 0.9
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Disk almost full on node {{ $labels.instance }}"
+            description: "Disk usage is over 90% on node {{ $labels.instance }}."
+
+        - alert: HighMemoryUsage
+          expr: avg(container_memory_usage_bytes / container_spec_memory_limit_bytes) by (pod) > 0.85
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High memory usage on pod {{ $labels.pod }}"
+            description: "Memory usage is over 85% on pod {{ $labels.pod }}."
+
+        - alert: PodCrashLooping
+          expr: increase(kube_pod_container_status_restarts_total[5m]) > 3
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.pod }} is crashing frequently"
+            description: "Pod {{ $labels.pod }} has restarted more than 3 times in the last 5 minutes."
+
+        - alert: KubePodNotReady
+          expr: kube_pod_status_ready{condition="true"} == 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.pod }} is not ready"
+            description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is not ready for over 5 minutes."

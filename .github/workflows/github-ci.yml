@@ -1,0 +1,41 @@
+# name: CI/CD automation
+# on:
+#   push:
+#     branches:
+#       - "**"
+# jobs:
+#   helm-deploy:
+#     runs-on: ["linux", "ubuntu", "docker", "shell", "frontend", "backend"]
+#     steps:
+#       - name: Checkout repo
+#         uses: actions/checkout@v3
+
+#       - name: Set up Helm
+#         run: |
+#           curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+#       - name: Add Helm repos
+#         run: |
+#           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+#           helm repo add elastic https://helm.elastic.co
+#           helm repo update
+
+#       - name: Build umbrella chart dependencies
+#         run: |
+#           cd observability-stack
+#           helm dependency update
+
+#       # - name: Validate rendered templates()
+#       #   run: |
+#       #     cd observability-stack
+#       #     helm template observability-stack . || (echo "Helm template failed" && exit 1)
+
+#       - name: Deploy the stack
+#         run: |
+#           helm upgrade --install observability-stack . \
+#             -f values/kube-prometheus-values.yaml \
+#             -f values/elasticsearch-values.yaml \
+#             -f values/kibana-values.yaml \
+#             -f values/logstash-values.yaml \
+#             -f values/filebeat-values.yaml \
+#             --namespace observability --create-namespace

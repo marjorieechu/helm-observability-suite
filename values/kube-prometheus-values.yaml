@@ -1,0 +1,41 @@
+# values/kube-prometheus-values.yaml
+
+grafana:
+  adminPassword: "strongpassword"
+  persistence:
+    enabled: true
+    size: 10Gi
+  sidecar:
+    dashboards:
+      enabled: true
+    datasources:
+      enabled: true
+  service:
+    type: ClusterIP
+
+prometheus:
+  prometheusSpec:
+    retention: 7d
+    serviceMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "200m"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+
+alertmanager:
+  alertmanagerSpec:
+    replicas: 2
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+
+kube-state-metrics:
+  enabled: true
+
+nodeExporter:
+  enabled: true
